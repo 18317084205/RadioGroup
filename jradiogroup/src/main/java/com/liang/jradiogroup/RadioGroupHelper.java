@@ -30,6 +30,10 @@ public class RadioGroupHelper {
         this.listener = listener;
     }
 
+    public View getChildView(int position) {
+        return views.size() > position ? views.get(position) : null;
+    }
+
     public void check(View view) {
         if (views.contains(view)) {
             if (view.isSelected()) {
