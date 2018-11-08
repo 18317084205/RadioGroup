@@ -9,6 +9,9 @@ import android.widget.TextView;
 import com.liang.jradiogroup.RadioGroupHelper;
 import com.liang.jradiogroup.RadioGroupListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
 
     TextView textView;
@@ -51,5 +54,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("radioGroupHelper", "onReselected" + view.getId());
             }
         });
+
     }
 }
