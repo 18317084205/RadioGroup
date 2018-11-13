@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridLayout;
 import android.widget.GridView;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 
 import java.util.HashMap;
@@ -23,23 +24,24 @@ import java.util.Map;
 public class JRadioGroup extends ViewGroup {
 
     public static final String TAG = JRadioGroup.class.getSimpleName();
-    /**
-     * The horizontal orientation.
-     */
-    public static final int HORIZONTAL = LinearLayout.HORIZONTAL;
 
-    /**
-     * The vertical orientation.
-     */
+    public static final int HORIZONTAL = LinearLayout.HORIZONTAL;
     public static final int VERTICAL = LinearLayout.VERTICAL;
+
+    public static final int TYPE_FLOW = 0;
+    public static final int TYPE_COLUMN = 1;
+    public static final int TYPE_ROW = 2;
 
     private Map<Integer, ChildParams> mChildParams = new LinkedHashMap<>();
 
-    private int mOrientation = HORIZONTAL;
-    private int mRowCount = 0;
+    private int mOrientation = VERTICAL;
+    private int mRowCount = 3;
     private int mColumnCount = 0;
     private int mRowSpan;
     private int mColumnSpan;
+
+    private int mType;
+
 
     public JRadioGroup(Context context) {
         this(context, null);
@@ -51,115 +53,43 @@ public class JRadioGroup extends ViewGroup {
 
     public JRadioGroup(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+
+
+        if (mRowCount > 0 && mColumnCount == 0) {
+            mType = TYPE_ROW;
+        } else if (mRowCount == 0 && mColumnCount == 0) {
+            mType = TYPE_FLOW;
+        } else {
+            mType = TYPE_COLUMN;
+        }
     }
 
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-//        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
         int mWidth = MeasureSpec.getSize(widthMeasureSpec);
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int mHeight = MeasureSpec.getSize(heightMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
 
-        int mGroupWidth = 0;
-        int mGroupHeight = 0;
-
-        int childTop = getPaddingTop();
-        int childLeft = getPaddingLeft();
-
-        mChildParams.clear();
-        if (mRowCount > 0 && mColumnCount > 0) {
-            if (mOrientation == HORIZONTAL) {
-                int mChildWidth = 0;
-                int mChildHeight = 0;
-
-                int mCount = getChildCount();
-
-                for (int i = 0; i < mCount; i++) {
-                    final View child = getChildAt(i);
-                    if (child.getVisibility() == View.GONE) {
-                        continue;
-                    }
-                    ChildParams childParams = new ChildParams();
-                    measureChild(child, widthMeasureSpec, heightMeasureSpec);
-                    MarginLayoutParams lp = (MarginLayoutParams) child
-                            .getLayoutParams();
-                    Log.e(TAG, "measure mColumnCount:" + mWidth / mColumnCount);
-                    int childWidth = mWidth / mColumnCount - lp.leftMargin
-                            - lp.rightMargin;
-                    int childHeight = child.getMeasuredHeight() + lp.topMargin
-                            + lp.bottomMargin;
-                    Log.e(TAG, "measure childWidth:" + childWidth);
-                    if (childWidth + mChildWidth > mWidth - getPaddingLeft() - getPaddingRight()) {
-                        mGroupWidth = Math.max(childWidth, mChildWidth);
-                        mChildWidth = childWidth;
-                        mGroupHeight += mChildHeight;
-                        mChildHeight = childHeight;
-                    } else {
-                        mChildWidth += childWidth;
-                        mChildHeight = Math.max(mChildHeight, childHeight);
-                    }
-
-                    if (i == mCount - 1) {
-                        mGroupWidth = Math.max(mChildWidth, mGroupWidth);
-                        mGroupHeight += mChildHeight;
-                    }
-                }
-            } else {
-
-            }
+        int[] size;
+        if (mOrientation == HORIZONTAL) {
+            size = measureChildrenWithHorizontal(widthMeasureSpec, heightMeasureSpec);
         } else {
-            int mChildWidth = 0;
-            int mChildHeight = 0;
-
-            int mCount = getChildCount();
-            for (int i = 0; i < mCount; i++) {
-                final View child = getChildAt(i);
-                if (child.getVisibility() == View.GONE) {
-                    continue;
-                }
-                ChildParams childParams = new ChildParams();
-                measureChild(child, widthMeasureSpec, heightMeasureSpec);
-
-                MarginLayoutParams lp = (MarginLayoutParams) child
-                        .getLayoutParams();
-                int childWidth = child.getMeasuredWidth();
-                int childHeight = child.getMeasuredHeight();
-                Log.e(TAG, "onLayout childWidth:" + childWidth);
-                if (childLeft + childWidth + lp.rightMargin > getWidth() - getPaddingLeft() - getPaddingRight()) {
-                    mGroupWidth = Math.max(childWidth + lp.leftMargin + lp.rightMargin, mChildWidth);
-                    mChildWidth = childWidth + lp.leftMargin + lp.rightMargin;
-                    mGroupHeight += mChildHeight;
-                    mChildHeight = childHeight + lp.topMargin + lp.bottomMargin;
-                    childLeft = getPaddingLeft();
-                    childTop += childHeight + lp.topMargin + lp.bottomMargin;
-                } else {
-                    mChildWidth += childWidth + lp.leftMargin + lp.rightMargin;
-                    mChildHeight = Math.max(mChildHeight, childHeight + lp.topMargin + lp.bottomMargin);
-                }
-
-                if (i == mCount - 1) {
-                    mGroupWidth = Math.max(mChildWidth, mGroupWidth);
-                    mGroupHeight += mChildHeight;
-                }
-
-                childParams.left = childLeft + lp.leftMargin;
-                childParams.top = childTop + lp.topMargin;
-                childParams.right = childParams.left + child.getMeasuredWidth();
-                childParams.bottom = childParams.top + child.getMeasuredHeight();
-                mChildParams.put(child.getId(), childParams);
-                childLeft += childWidth + lp.leftMargin + lp.rightMargin;
-            }
+            size = measureChildrenWithVertical(widthMeasureSpec, heightMeasureSpec);
         }
 
 
+        Log.e(TAG, "Measure mGroupWidth:" + size[0]);
+        Log.e(TAG, "Measure mGroupHeight:" + size[1]);
         setMeasuredDimension(
-                widthMode == MeasureSpec.EXACTLY ? mWidth : mGroupWidth + getPaddingLeft() + getPaddingRight(),
-                heightMode == MeasureSpec.EXACTLY ? mHeight : mGroupHeight + getPaddingTop() + getPaddingBottom()
+                widthMode == MeasureSpec.EXACTLY ? mWidth : size[0] + getPaddingLeft() + getPaddingRight(),
+                heightMode == MeasureSpec.EXACTLY ? mHeight : size[1] + getPaddingTop() + getPaddingBottom()
         );
 
     }
+
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
@@ -176,6 +106,163 @@ public class JRadioGroup extends ViewGroup {
             child.layout(params.left, params.top, params.right, params.bottom);
         }
 
+    }
+
+    private int[] measureChildrenWithHorizontal(int widthMeasureSpec, int heightMeasureSpec) {
+
+        int mWidth = MeasureSpec.getSize(widthMeasureSpec);
+
+        int childTop = getPaddingTop();
+        int childLeft = getPaddingLeft();
+
+        int mGroupWidth = 0;
+        int mGroupHeight = 0;
+
+        int mChildWidth = 0;
+        int mChildHeight = 0;
+
+        int mCount = getChildCount();
+        for (int i = 0; i < mCount; i++) {
+            final View child = getChildAt(i);
+            if (child.getVisibility() == View.GONE) {
+                continue;
+            }
+            ChildParams childParams = new ChildParams();
+            measureChild(child, widthMeasureSpec, heightMeasureSpec);
+
+            MarginLayoutParams lp = (MarginLayoutParams) child
+                    .getLayoutParams();
+
+            int childWidth = 0;
+            switch (mType) {
+                case TYPE_FLOW:
+                    childWidth = child.getMeasuredWidth();
+                    break;
+                case TYPE_COLUMN:
+                    childWidth = (mWidth - getPaddingLeft() - getPaddingRight() -
+                            lp.leftMargin * mColumnCount - lp.rightMargin * mColumnCount) / mColumnCount;
+                    break;
+                case TYPE_ROW:
+                    int columnCount = mCount % mRowCount == 0 ? mCount / mRowCount : (mCount / mRowCount + 1);
+                    childWidth = (mWidth - getPaddingLeft() - getPaddingRight() -
+                            lp.leftMargin * columnCount - lp.rightMargin * columnCount) / columnCount;
+                    break;
+
+            }
+
+            int childHeight = child.getMeasuredHeight();
+            if (childLeft + childWidth + lp.rightMargin > mWidth - getPaddingLeft() - getPaddingRight()) {
+                mGroupWidth = Math.max(childWidth + lp.leftMargin + lp.rightMargin, mChildWidth);
+                mChildWidth = childWidth + lp.leftMargin + lp.rightMargin;
+                mGroupHeight += mChildHeight;
+                mChildHeight = childHeight + lp.topMargin + lp.bottomMargin;
+                childLeft = getPaddingLeft();
+                childTop += childHeight + lp.topMargin + lp.bottomMargin;
+            } else {
+                mChildWidth += childWidth + lp.leftMargin + lp.rightMargin;
+                mChildHeight = Math.max(mChildHeight, childHeight + lp.topMargin + lp.bottomMargin);
+            }
+
+            if (i == mCount - 1) {
+                mGroupWidth = Math.max(mChildWidth, mGroupWidth);
+                mGroupHeight += mChildHeight;
+            }
+
+            childParams.left = childLeft + lp.leftMargin;
+            childParams.top = childTop + lp.topMargin;
+            childParams.right = childParams.left + childWidth;
+            childParams.bottom = childParams.top + childHeight;
+            mChildParams.put(child.getId(), childParams);
+            childLeft += childWidth + lp.leftMargin + lp.rightMargin;
+        }
+
+        return new int[]{mGroupWidth, mGroupHeight};
+    }
+
+    private int[] measureChildrenWithVertical(int widthMeasureSpec, int heightMeasureSpec) {
+
+        if (mType == TYPE_FLOW) {
+            return measureChildrenWithHorizontal(widthMeasureSpec, heightMeasureSpec);
+        }
+
+        int mWidth = MeasureSpec.getSize(widthMeasureSpec);
+
+        int childTop = getPaddingTop();
+        int childLeft = getPaddingLeft();
+
+        int mGroupWidth = 0;
+        int mGroupHeight = 0;
+
+        int mChildWidth = 0;
+        int mChildHeight = 0;
+
+        int rowCount = mRowCount;
+        int row = 0;
+
+        int mCount = getChildCount();
+        for (int i = 0; i < mCount; i++) {
+            final View child = getChildAt(i);
+            if (child.getVisibility() == View.GONE) {
+                continue;
+            }
+            ChildParams childParams = new ChildParams();
+            measureChild(child, widthMeasureSpec, heightMeasureSpec);
+
+            MarginLayoutParams lp = (MarginLayoutParams) child
+                    .getLayoutParams();
+
+
+            int childWidth = 0;
+            switch (mType) {
+                case TYPE_FLOW:
+                    break;
+                case TYPE_COLUMN:
+                    childWidth = (mWidth - getPaddingLeft() - getPaddingRight() -
+                            lp.leftMargin * mColumnCount - lp.rightMargin * mColumnCount) / mColumnCount;
+                    rowCount = mCount % mColumnCount == 0 ? mCount / mColumnCount : (mCount / mColumnCount + 1);
+                    break;
+                case TYPE_ROW:
+                    if (getParent() instanceof HorizontalScrollView) {
+                        childWidth = child.getMeasuredWidth();
+                    } else {
+                        int columnCount = mCount % mRowCount == 0 ? mCount / mRowCount : (mCount / mRowCount + 1);
+                        childWidth = (mWidth - getPaddingLeft() - getPaddingRight() -
+                                lp.leftMargin * columnCount - lp.rightMargin * columnCount) / columnCount;
+                    }
+                    break;
+
+            }
+            int childHeight = child.getMeasuredHeight();
+            if (row == rowCount) {
+                mChildWidth = Math.max(mChildWidth, childWidth + lp.leftMargin + lp.rightMargin);
+                mGroupWidth += mChildWidth;
+                mGroupHeight = Math.max(mChildHeight, childHeight + lp.topMargin + lp.bottomMargin);
+                mChildHeight = childHeight + lp.topMargin + lp.bottomMargin;
+                childLeft += mChildWidth;
+                childTop = getPaddingTop();
+                row = 1;
+            } else {
+                mChildWidth = Math.max(mChildWidth, childWidth + lp.leftMargin + lp.rightMargin);
+                mChildHeight += childHeight + lp.topMargin + lp.bottomMargin;
+                row++;
+            }
+            Log.e(TAG, "Measure mChildWidth:" + mChildWidth);
+            Log.e(TAG, "Measure childLeft:" + childLeft);
+            if (i == mCount - 1) {
+                mGroupWidth = Math.max(mChildWidth, mGroupWidth);
+                mGroupHeight = Math.max(mChildHeight, mGroupHeight);
+            }
+
+            childParams.left = childLeft + lp.leftMargin;
+            childParams.top = childTop + lp.topMargin;
+            childParams.right = childParams.left + childWidth;
+            childParams.bottom = childParams.top + childHeight;
+            mChildParams.put(child.getId(), childParams);
+            childTop += childHeight + lp.topMargin + lp.bottomMargin;
+            Log.e(TAG, "Measure left:" + childParams.left);
+        }
+
+        return new int[]{mGroupWidth, mGroupHeight};
     }
 
     @Override
