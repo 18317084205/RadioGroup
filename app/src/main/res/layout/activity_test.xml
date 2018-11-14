@@ -9,7 +9,7 @@
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <com.liang.jradiogroup.JRadioGroup
+        <com.liang.jradiogroup.JFlowLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#838689">
@@ -105,7 +105,7 @@
                 android:layout_margin="10dp"
                 android:background="@color/colorPrimary"
                 android:textColor="@drawable/text_color_tab" />
-        </com.liang.jradiogroup.JRadioGroup>
+        </com.liang.jradiogroup.JFlowLayout>
     </HorizontalScrollView>
 
 

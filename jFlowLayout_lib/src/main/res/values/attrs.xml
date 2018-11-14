@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="JFlowLayout">
+        <attr name="rowCount" format="dimension" />
+        <attr name="columnCount" format="dimension" />
+        <attr name="rowSpan" format="dimension" />
+        <attr name="columnSpan" format="dimension" />
+
+        <attr name="tabMode">
+            <enum name="scrollable" value="0" />
+            <enum name="fixed" value="1" />
+        </attr>
+
+        <attr name="Orientation">
+            <enum name="horizontal" value="0" />
+            <enum name="vertical" value="1" />
+        </attr>
+
+    </declare-styleable>
+</resources>

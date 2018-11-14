@@ -5,12 +5,9 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.GridLayout;
-import android.widget.GridView;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -21,9 +18,9 @@ import java.util.Map;
  * android:layout_rowSpan = "X"    纵向横跨X行
  * android:layout_columnSpan = "X"     横向横跨X列
  */
-public class JRadioGroup extends ViewGroup {
+public class JFlowLayout extends ViewGroup {
 
-    public static final String TAG = JRadioGroup.class.getSimpleName();
+    public static final String TAG = JFlowLayout.class.getSimpleName();
 
     public static final int HORIZONTAL = LinearLayout.HORIZONTAL;
     public static final int VERTICAL = LinearLayout.VERTICAL;
@@ -32,7 +29,7 @@ public class JRadioGroup extends ViewGroup {
     public static final int TYPE_COLUMN = 1;
     public static final int TYPE_ROW = 2;
 
-    private Map<Integer, ChildParams> mChildParams = new LinkedHashMap<>();
+    private Map<Integer, ChildLayout> mChildParams = new LinkedHashMap<>();
 
     private int mOrientation = VERTICAL;
     private int mRowCount = 3;
@@ -43,17 +40,16 @@ public class JRadioGroup extends ViewGroup {
     private int mType;
 
 
-    public JRadioGroup(Context context) {
+    public JFlowLayout(Context context) {
         this(context, null);
     }
 
-    public JRadioGroup(Context context, AttributeSet attrs) {
+    public JFlowLayout(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public JRadioGroup(Context context, AttributeSet attrs, int defStyleAttr) {
+    public JFlowLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-
 
         if (mRowCount > 0 && mColumnCount == 0) {
             mType = TYPE_ROW;
@@ -64,6 +60,19 @@ public class JRadioGroup extends ViewGroup {
         }
     }
 
+    @Override
+    public void addView(View child, int index, LayoutParams params) {
+        JLayoutParams lp = (JLayoutParams) params;
+        ChildLayout childLayout = new ChildLayout(getContext());
+        childLayout.rowSpan = lp.rowSpan;
+        childLayout.columnSpan = lp.columnSpan;
+        childLayout.leftMargin = lp.leftMargin;
+        childLayout.topMargin = lp.topMargin;
+        childLayout.rightMargin = lp.rightMargin;
+        childLayout.bottomMargin = lp.bottomMargin;
+        childLayout.addView(child);
+        super.addView(childLayout, index, lp);
+    }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -80,7 +89,6 @@ public class JRadioGroup extends ViewGroup {
             size = measureChildrenWithVertical(widthMeasureSpec, heightMeasureSpec);
         }
 
-
         Log.e(TAG, "Measure mGroupWidth:" + size[0]);
         Log.e(TAG, "Measure mGroupHeight:" + size[1]);
         setMeasuredDimension(
@@ -95,15 +103,15 @@ public class JRadioGroup extends ViewGroup {
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         int mCount = getChildCount();
         for (int i = 0; i < mCount; i++) {
-            View child = getChildAt(i);
+            ChildLayout child = (ChildLayout) getChildAt(i);
+            if (child == null) {
+                continue;
+            }
             if (child.getVisibility() == View.GONE) {
                 continue;
             }
-            ChildParams params = mChildParams.get(child.getId());
-            if (params == null) {
-                continue;
-            }
-            child.layout(params.left, params.top, params.right, params.bottom);
+
+            child.layout(child.left, child.top, child.right, child.bottom);
         }
 
     }
@@ -127,9 +135,7 @@ public class JRadioGroup extends ViewGroup {
             if (child.getVisibility() == View.GONE) {
                 continue;
             }
-            ChildParams childParams = new ChildParams();
             measureChild(child, widthMeasureSpec, heightMeasureSpec);
-
             MarginLayoutParams lp = (MarginLayoutParams) child
                     .getLayoutParams();
 
@@ -167,12 +173,8 @@ public class JRadioGroup extends ViewGroup {
                 mGroupWidth = Math.max(mChildWidth, mGroupWidth);
                 mGroupHeight += mChildHeight;
             }
-
-            childParams.left = childLeft + lp.leftMargin;
-            childParams.top = childTop + lp.topMargin;
-            childParams.right = childParams.left + childWidth;
-            childParams.bottom = childParams.top + childHeight;
-            mChildParams.put(child.getId(), childParams);
+//            ChildParams childParams = createParams(childLeft, childTop, childWidth, childHeight, lp);
+//            mChildParams.put(child.getId(), childParams);
             childLeft += childWidth + lp.leftMargin + lp.rightMargin;
         }
 
@@ -201,16 +203,13 @@ public class JRadioGroup extends ViewGroup {
 
         int mCount = getChildCount();
         for (int i = 0; i < mCount; i++) {
-            final View child = getChildAt(i);
-            if (child.getVisibility() == View.GONE) {
+
+            final ChildLayout child = (ChildLayout) getChildAt(i);
+            if (child == null || child.getVisibility() == View.GONE) {
                 continue;
             }
-            ChildParams childParams = new ChildParams();
+
             measureChild(child, widthMeasureSpec, heightMeasureSpec);
-
-            MarginLayoutParams lp = (MarginLayoutParams) child
-                    .getLayoutParams();
-
 
             int childWidth = 0;
             switch (mType) {
@@ -218,7 +217,7 @@ public class JRadioGroup extends ViewGroup {
                     break;
                 case TYPE_COLUMN:
                     childWidth = (mWidth - getPaddingLeft() - getPaddingRight() -
-                            lp.leftMargin * mColumnCount - lp.rightMargin * mColumnCount) / mColumnCount;
+                            child.leftMargin * mColumnCount - child.rightMargin * mColumnCount) / mColumnCount;
                     rowCount = mCount % mColumnCount == 0 ? mCount / mColumnCount : (mCount / mColumnCount + 1);
                     break;
                 case TYPE_ROW:
@@ -227,56 +226,56 @@ public class JRadioGroup extends ViewGroup {
                     } else {
                         int columnCount = mCount % mRowCount == 0 ? mCount / mRowCount : (mCount / mRowCount + 1);
                         childWidth = (mWidth - getPaddingLeft() - getPaddingRight() -
-                                lp.leftMargin * columnCount - lp.rightMargin * columnCount) / columnCount;
+                                child.leftMargin * columnCount - child.rightMargin * columnCount) / columnCount;
                     }
                     break;
-
             }
             int childHeight = child.getMeasuredHeight();
             if (row == rowCount) {
-                mChildWidth = Math.max(mChildWidth, childWidth + lp.leftMargin + lp.rightMargin);
-                mGroupWidth += mChildWidth;
-                mGroupHeight = Math.max(mChildHeight, childHeight + lp.topMargin + lp.bottomMargin);
-                mChildHeight = childHeight + lp.topMargin + lp.bottomMargin;
+                mGroupHeight = Math.max(mChildHeight, childHeight + child.topMargin + child.bottomMargin);
+                mChildHeight = childHeight + child.topMargin + child.bottomMargin;
                 childLeft += mChildWidth;
                 childTop = getPaddingTop();
+                mChildWidth = childWidth + child.leftMargin + child.rightMargin;
                 row = 1;
             } else {
-                mChildWidth = Math.max(mChildWidth, childWidth + lp.leftMargin + lp.rightMargin);
-                mChildHeight += childHeight + lp.topMargin + lp.bottomMargin;
+                mChildWidth = Math.max(mChildWidth, childWidth + child.leftMargin + child.rightMargin);
+                mChildHeight += childHeight + child.topMargin + child.bottomMargin;
                 row++;
             }
-            Log.e(TAG, "Measure mChildWidth:" + mChildWidth);
-            Log.e(TAG, "Measure childLeft:" + childLeft);
+
+            restParams(child, childLeft, childTop, childWidth, childHeight);
+            childTop += childHeight + child.topMargin + child.bottomMargin;
+
             if (i == mCount - 1) {
-                mGroupWidth = Math.max(mChildWidth, mGroupWidth);
+                mGroupWidth = child.right + child.rightMargin + getPaddingRight();
                 mGroupHeight = Math.max(mChildHeight, mGroupHeight);
             }
-
-            childParams.left = childLeft + lp.leftMargin;
-            childParams.top = childTop + lp.topMargin;
-            childParams.right = childParams.left + childWidth;
-            childParams.bottom = childParams.top + childHeight;
-            mChildParams.put(child.getId(), childParams);
-            childTop += childHeight + lp.topMargin + lp.bottomMargin;
-            Log.e(TAG, "Measure left:" + childParams.left);
         }
 
         return new int[]{mGroupWidth, mGroupHeight};
     }
 
+
+    private void restParams(ChildLayout child, int childLeft, int childTop, int childWidth, int childHeight) {
+        child.left = childLeft + child.leftMargin;
+        child.top = childTop + child.topMargin;
+        child.right = child.left + childWidth;
+        child.bottom = child.top + childHeight;
+    }
+
     @Override
     public LayoutParams generateLayoutParams(AttributeSet attrs) {
-        return new MarginLayoutParams(getContext(), attrs);
+        return new JLayoutParams(getContext(), attrs);
     }
 
     @Override
     protected LayoutParams generateDefaultLayoutParams() {
-        return new MarginLayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        return new JLayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
     }
 
     @Override
     protected LayoutParams generateLayoutParams(LayoutParams p) {
-        return new MarginLayoutParams(p);
+        return new JLayoutParams(p);
     }
 }
