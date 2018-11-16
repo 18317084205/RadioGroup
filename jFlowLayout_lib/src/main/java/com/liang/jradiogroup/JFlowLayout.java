@@ -1,6 +1,7 @@
 package com.liang.jradiogroup;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -29,13 +30,9 @@ public class JFlowLayout extends ViewGroup {
     public static final int TYPE_COLUMN = 1;
     public static final int TYPE_ROW = 2;
 
-    private Map<Integer, ChildLayout> mChildParams = new LinkedHashMap<>();
-
-    private int mOrientation = VERTICAL;
-    private int mRowCount = 3;
-    private int mColumnCount = 0;
-    private int mRowSpan;
-    private int mColumnSpan;
+    private int mOrientation = HORIZONTAL;
+    private int mRowCount = 0;
+    private int mColumnCount = 3;
 
     private int mType;
 
@@ -58,42 +55,59 @@ public class JFlowLayout extends ViewGroup {
         } else {
             mType = TYPE_COLUMN;
         }
+
     }
 
     @Override
     public void addView(View child, int index, LayoutParams params) {
-        JLayoutParams lp = (JLayoutParams) params;
         ChildLayout childLayout = new ChildLayout(getContext());
-        childLayout.rowSpan = lp.rowSpan;
-        childLayout.columnSpan = lp.columnSpan;
-        childLayout.leftMargin = lp.leftMargin;
-        childLayout.topMargin = lp.topMargin;
-        childLayout.rightMargin = lp.rightMargin;
-        childLayout.bottomMargin = lp.bottomMargin;
-        childLayout.addView(child);
-        super.addView(childLayout, index, lp);
+        childLayout.setBackgroundColor(Color.RED);
+        childLayout.addView(child, params);
+        LayoutParams layoutParams = new LayoutParams(params);
+        super.addView(childLayout, index, layoutParams);
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
-        int mWidth = MeasureSpec.getSize(widthMeasureSpec);
+        int width = MeasureSpec.getSize(widthMeasureSpec);
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-        int mHeight = MeasureSpec.getSize(heightMeasureSpec);
+        int height = MeasureSpec.getSize(heightMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
 
-        int[] size;
-        if (mOrientation == HORIZONTAL) {
-            size = measureChildrenWithHorizontal(widthMeasureSpec, heightMeasureSpec);
-        } else {
-            size = measureChildrenWithVertical(widthMeasureSpec, heightMeasureSpec);
+        int childWidth = 0;
+        int mCount = getChildCount();
+
+        switch (mType) {
+            case TYPE_FLOW:
+                break;
+            case TYPE_COLUMN:
+                childWidth = (width - getPaddingLeft() - getPaddingRight()) / mColumnCount;
+                if (mOrientation == VERTICAL) {
+                    mRowCount = mCount % mColumnCount == 0 ? mCount / mColumnCount : (mCount / mColumnCount + 1);
+                }
+                break;
+            case TYPE_ROW:
+                mColumnCount = mCount % mRowCount == 0 ? mCount / mRowCount : (mCount / mRowCount + 1);
+                childWidth = (width - getPaddingLeft() - getPaddingRight()) / mColumnCount;
+                break;
         }
 
-        Log.e(TAG, "Measure mGroupWidth:" + size[0]);
-        Log.e(TAG, "Measure mGroupHeight:" + size[1]);
+        int[] size;
+
+        if (mOrientation == HORIZONTAL) {
+            size = measureChildrenWithHorizontal(widthMeasureSpec, heightMeasureSpec, childWidth);
+        } else {
+            if (mType == TYPE_FLOW) {
+                size = measureChildrenWithHorizontal(widthMeasureSpec, heightMeasureSpec, childWidth);
+            } else {
+                size = measureChildrenWithVertical(widthMeasureSpec, heightMeasureSpec, childWidth, mRowCount);
+            }
+        }
+
         setMeasuredDimension(
-                widthMode == MeasureSpec.EXACTLY ? mWidth : size[0] + getPaddingLeft() + getPaddingRight(),
-                heightMode == MeasureSpec.EXACTLY ? mHeight : size[1] + getPaddingTop() + getPaddingBottom()
+                widthMode == MeasureSpec.EXACTLY ? width : size[0] + getPaddingLeft() + getPaddingRight(),
+                heightMode == MeasureSpec.EXACTLY ? height : size[1] + getPaddingTop() + getPaddingBottom()
         );
 
     }
@@ -110,98 +124,70 @@ public class JFlowLayout extends ViewGroup {
             if (child.getVisibility() == View.GONE) {
                 continue;
             }
-
             child.layout(child.left, child.top, child.right, child.bottom);
         }
-
     }
 
-    private int[] measureChildrenWithHorizontal(int widthMeasureSpec, int heightMeasureSpec) {
+    private int[] measureChildrenWithHorizontal(int widthMeasureSpec, int heightMeasureSpec, int defChildWidth) {
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        int maxWidth = 0;
+        int maxHeight = 0;
 
-        int mWidth = MeasureSpec.getSize(widthMeasureSpec);
+        int maxChildWidth = 0;
+        int maxChildHeight = 0;
 
-        int childTop = getPaddingTop();
-        int childLeft = getPaddingLeft();
-
-        int mGroupWidth = 0;
-        int mGroupHeight = 0;
-
-        int mChildWidth = 0;
-        int mChildHeight = 0;
 
         int mCount = getChildCount();
         for (int i = 0; i < mCount; i++) {
-            final View child = getChildAt(i);
-            if (child.getVisibility() == View.GONE) {
+            final ChildLayout child = (ChildLayout) getChildAt(i);
+            if (child == null || child.getVisibility() == View.GONE) {
                 continue;
             }
             measureChild(child, widthMeasureSpec, heightMeasureSpec);
-            MarginLayoutParams lp = (MarginLayoutParams) child
-                    .getLayoutParams();
-
             int childWidth = 0;
-            switch (mType) {
-                case TYPE_FLOW:
-                    childWidth = child.getMeasuredWidth();
-                    break;
-                case TYPE_COLUMN:
-                    childWidth = (mWidth - getPaddingLeft() - getPaddingRight() -
-                            lp.leftMargin * mColumnCount - lp.rightMargin * mColumnCount) / mColumnCount;
-                    break;
-                case TYPE_ROW:
-                    int columnCount = mCount % mRowCount == 0 ? mCount / mRowCount : (mCount / mRowCount + 1);
-                    childWidth = (mWidth - getPaddingLeft() - getPaddingRight() -
-                            lp.leftMargin * columnCount - lp.rightMargin * columnCount) / columnCount;
-                    break;
-
-            }
-
-            int childHeight = child.getMeasuredHeight();
-            if (childLeft + childWidth + lp.rightMargin > mWidth - getPaddingLeft() - getPaddingRight()) {
-                mGroupWidth = Math.max(childWidth + lp.leftMargin + lp.rightMargin, mChildWidth);
-                mChildWidth = childWidth + lp.leftMargin + lp.rightMargin;
-                mGroupHeight += mChildHeight;
-                mChildHeight = childHeight + lp.topMargin + lp.bottomMargin;
-                childLeft = getPaddingLeft();
-                childTop += childHeight + lp.topMargin + lp.bottomMargin;
+            if (mType == TYPE_FLOW) {
+                childWidth = child.getMeasuredWidth();
             } else {
-                mChildWidth += childWidth + lp.leftMargin + lp.rightMargin;
-                mChildHeight = Math.max(mChildHeight, childHeight + lp.topMargin + lp.bottomMargin);
+                childWidth = defChildWidth * Math.min(child.rowSpan, mColumnCount);
+            }
+            Log.e(TAG, "measureChildrenWithHorizontal childWidth: " + childWidth);
+            int childHeight = child.getMeasuredHeight();
+            if (maxChildWidth + childWidth > width - getPaddingLeft() - getPaddingRight()) {
+                maxWidth = Math.max(childWidth, maxChildWidth);
+                maxChildWidth = childWidth;
+                maxHeight += maxChildHeight;
+                child.left = getPaddingLeft();
+                maxChildHeight = childHeight;
+            } else {
+                child.left = maxChildWidth;
+                maxChildWidth += childWidth;
+                maxChildHeight = Math.max(maxChildHeight, childHeight);
+            }
+            child.top = maxHeight;
+            if (i == mCount - 1) {
+                maxWidth = Math.max(maxChildWidth, maxWidth);
+                maxHeight += maxChildHeight;
             }
 
-            if (i == mCount - 1) {
-                mGroupWidth = Math.max(mChildWidth, mGroupWidth);
-                mGroupHeight += mChildHeight;
-            }
-//            ChildParams childParams = createParams(childLeft, childTop, childWidth, childHeight, lp);
-//            mChildParams.put(child.getId(), childParams);
-            childLeft += childWidth + lp.leftMargin + lp.rightMargin;
+            child.right = child.left + childWidth;
+            child.bottom = child.top + childHeight;
         }
 
-        return new int[]{mGroupWidth, mGroupHeight};
+        return new int[]{maxWidth, maxHeight};
     }
 
-    private int[] measureChildrenWithVertical(int widthMeasureSpec, int heightMeasureSpec) {
+    private int[] measureChildrenWithVertical(int widthMeasureSpec, int heightMeasureSpec, int childWidth, int rowCount) {
 
-        if (mType == TYPE_FLOW) {
-            return measureChildrenWithHorizontal(widthMeasureSpec, heightMeasureSpec);
-        }
+        int maxWidth = 0;
+        int maxHeight = 0;
 
-        int mWidth = MeasureSpec.getSize(widthMeasureSpec);
+        int maxChildWidth = 0;
+        int maxChildHeight = 0;
 
-        int childTop = getPaddingTop();
-        int childLeft = getPaddingLeft();
-
-        int mGroupWidth = 0;
-        int mGroupHeight = 0;
-
-        int mChildWidth = 0;
-        int mChildHeight = 0;
-
-        int rowCount = mRowCount;
         int row = 0;
 
         int mCount = getChildCount();
+
         for (int i = 0; i < mCount; i++) {
 
             final ChildLayout child = (ChildLayout) getChildAt(i);
@@ -211,57 +197,41 @@ public class JFlowLayout extends ViewGroup {
 
             measureChild(child, widthMeasureSpec, heightMeasureSpec);
 
-            int childWidth = 0;
-            switch (mType) {
-                case TYPE_FLOW:
-                    break;
-                case TYPE_COLUMN:
-                    childWidth = (mWidth - getPaddingLeft() - getPaddingRight() -
-                            child.leftMargin * mColumnCount - child.rightMargin * mColumnCount) / mColumnCount;
-                    rowCount = mCount % mColumnCount == 0 ? mCount / mColumnCount : (mCount / mColumnCount + 1);
-                    break;
-                case TYPE_ROW:
-                    if (getParent() instanceof HorizontalScrollView) {
-                        childWidth = child.getMeasuredWidth();
-                    } else {
-                        int columnCount = mCount % mRowCount == 0 ? mCount / mRowCount : (mCount / mRowCount + 1);
-                        childWidth = (mWidth - getPaddingLeft() - getPaddingRight() -
-                                child.leftMargin * columnCount - child.rightMargin * columnCount) / columnCount;
-                    }
-                    break;
-            }
             int childHeight = child.getMeasuredHeight();
+
+            if (getParent() instanceof HorizontalScrollView) {
+                childWidth = child.getMeasuredWidth();
+            }
+
             if (row == rowCount) {
-                mGroupHeight = Math.max(mChildHeight, childHeight + child.topMargin + child.bottomMargin);
-                mChildHeight = childHeight + child.topMargin + child.bottomMargin;
-                childLeft += mChildWidth;
-                childTop = getPaddingTop();
-                mChildWidth = childWidth + child.leftMargin + child.rightMargin;
+                maxHeight = Math.max(maxChildHeight, childHeight);
+                maxChildHeight = childHeight;
+                child.left = maxWidth += maxChildWidth;
+                child.top = getPaddingTop();
+                maxChildWidth = childWidth;
                 row = 1;
             } else {
-                mChildWidth = Math.max(mChildWidth, childWidth + child.leftMargin + child.rightMargin);
-                mChildHeight += childHeight + child.topMargin + child.bottomMargin;
+                maxChildWidth = Math.max(maxChildWidth, childWidth);
+                child.left = maxWidth;
+                child.top = maxChildHeight;
+                maxChildHeight += childHeight;
                 row++;
             }
 
-            restParams(child, childLeft, childTop, childWidth, childHeight);
-            childTop += childHeight + child.topMargin + child.bottomMargin;
+            if (i == 0) {
+                child.left = getPaddingLeft();
+                child.top = getPaddingTop();
+            }
 
+            child.right = child.left + childWidth;
+            child.bottom = child.top + childHeight;
             if (i == mCount - 1) {
-                mGroupWidth = child.right + child.rightMargin + getPaddingRight();
-                mGroupHeight = Math.max(mChildHeight, mGroupHeight);
+                maxWidth = child.right;
+                maxHeight = Math.max(maxChildHeight, maxHeight);
             }
         }
 
-        return new int[]{mGroupWidth, mGroupHeight};
-    }
-
-
-    private void restParams(ChildLayout child, int childLeft, int childTop, int childWidth, int childHeight) {
-        child.left = childLeft + child.leftMargin;
-        child.top = childTop + child.topMargin;
-        child.right = child.left + childWidth;
-        child.bottom = child.top + childHeight;
+        return new int[]{maxWidth, maxHeight};
     }
 
     @Override

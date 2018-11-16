@@ -5,108 +5,104 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".TestActivity">
-
-    <HorizontalScrollView
+    <com.liang.jradiogroup.JFlowLayout
+        android:id="@+id/JFlowLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <com.liang.jradiogroup.JFlowLayout
-            android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#838689">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="#838689">
+            android:layout_margin="10dp"
+            android:background="@color/colorPrimary"
+            android:text="asd1"
+            app:rowSpan = "2"
+            android:textColor="@drawable/text_color_tab" />
 
-            <TextView
-                android:id="@+id/textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="JRadioGroup000001"
-                android:layout_margin="10dp"
-                android:background="@color/colorPrimary"
-                android:textColor="@drawable/text_color_tab" />
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@color/colorPrimary"
+            android:text="aa2"
+            android:textColor="@drawable/text_color_tab" />
 
-            <TextView
-                android:id="@+id/textView2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="JRadioGroup002"
-                android:layout_margin="10dp"
-                android:background="@color/colorPrimary"
-                android:textColor="@drawable/text_color_tab" />
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@color/colorPrimary"
+            android:text="b3"
+            android:textColor="@drawable/text_color_tab" />
 
-            <TextView
-                android:id="@+id/textView3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="JRadioGroup003"
-                android:layout_margin="10dp"
-                android:background="@color/colorPrimary"
-                android:textColor="@drawable/text_color_tab" />
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@color/colorPrimary"
+            android:text="fghgg4"
+            android:textColor="@drawable/text_color_tab" />
 
-            <TextView
-                android:id="@+id/textView4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="JRadioGroup004"
-                android:layout_margin="10dp"
-                android:background="@color/colorPrimary"
-                android:textColor="@drawable/text_color_tab" />
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@color/colorPrimary"
+            android:text="JRadioGroup000005"
+            android:textColor="@drawable/text_color_tab" />
 
-            <TextView
-                android:id="@+id/textView5"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="JRadioGroup000005"
-                android:layout_margin="10dp"
-                android:background="@color/colorPrimary"
-                android:textColor="@drawable/text_color_tab" />
+        <TextView
+            android:id="@+id/textView6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@color/colorPrimary"
+            android:text="JRadioGroup006"
+            android:textColor="@drawable/text_color_tab" />
 
-            <TextView
-                android:id="@+id/textView6"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="JRadioGroup006"
-                android:layout_margin="10dp"
-                android:background="@color/colorPrimary"
-                android:textColor="@drawable/text_color_tab" />
-
-            <TextView
-                android:id="@+id/textView7"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="JRadioGroup007"
-                android:layout_margin="10dp"
-                android:background="@color/colorPrimary"
-                android:textColor="@drawable/text_color_tab" />
+        <TextView
+            android:id="@+id/textView7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@color/colorPrimary"
+            android:text="JRadioGroup007"
+            android:textColor="@drawable/text_color_tab" />
 
 
-            <TextView
-                android:id="@+id/textView8"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="JRadioGroup008"
-                android:layout_margin="10dp"
-                android:background="@color/colorPrimary"
-                android:textColor="@drawable/text_color_tab" />
+        <TextView
+            android:id="@+id/textView8"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@color/colorPrimary"
+            android:text="JRadioGroup008"
+            android:textColor="@drawable/text_color_tab" />
 
 
-            <TextView
-                android:id="@+id/textView9"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="JRadioGroup009"
-                android:layout_margin="10dp"
-                android:background="@color/colorPrimary"
-                android:textColor="@drawable/text_color_tab" />
+        <TextView
+            android:id="@+id/textView9"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@color/colorPrimary"
+            android:text="JRadioGroup009"
+            android:textColor="@drawable/text_color_tab" />
 
-            <TextView
-                android:id="@+id/textView0"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="JRadioGroup00000"
-                android:layout_margin="10dp"
-                android:background="@color/colorPrimary"
-                android:textColor="@drawable/text_color_tab" />
-        </com.liang.jradiogroup.JFlowLayout>
-    </HorizontalScrollView>
-
+        <TextView
+            android:id="@+id/textView0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@color/colorPrimary"
+            android:text="JRadioGroup00000"
+            android:textColor="@drawable/text_color_tab" />
+    </com.liang.jradiogroup.JFlowLayout>
 
 </android.support.constraint.ConstraintLayout>
