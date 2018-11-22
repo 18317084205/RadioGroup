@@ -1,11 +1,13 @@
 package com.liang.jradiogroup;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 
@@ -13,11 +15,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * android:orientation=""     vertical(竖直,默认)或者horizontal(水平)
+ * android:orientation=""     vertical(竖直)或者horizontal(水平,默认)
  * 设置有多少行:android:rowCount=""
  * 设置有多少列:android:columnCount=""
- * android:layout_rowSpan = "X"    纵向横跨X行
- * android:layout_columnSpan = "X"     横向横跨X列
  */
 public class JFlowLayout extends ViewGroup {
 
@@ -29,10 +29,11 @@ public class JFlowLayout extends ViewGroup {
     public static final int TYPE_FLOW = 0;
     public static final int TYPE_COLUMN = 1;
     public static final int TYPE_ROW = 2;
+    private final int mCheckNum;
 
-    private int mOrientation = HORIZONTAL;
-    private int mRowCount = 0;
-    private int mColumnCount = 3;
+    private int mOrientation = VERTICAL;
+    private int mRowCount;
+    private int mColumnCount;
 
     private int mType;
 
@@ -48,6 +49,12 @@ public class JFlowLayout extends ViewGroup {
     public JFlowLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
+        TypedArray type = context.obtainStyledAttributes(attrs, R.styleable.JFlowLayout);
+        mRowCount = type.getInt(R.styleable.JFlowLayout_rowCount, 0);
+        mColumnCount = type.getInt(R.styleable.JFlowLayout_columnCount, 0);
+        mCheckNum = type.getInt(R.styleable.JFlowLayout_checkNum, 0);
+        type.recycle();
+
         if (mRowCount > 0 && mColumnCount == 0) {
             mType = TYPE_ROW;
         } else if (mRowCount == 0 && mColumnCount == 0) {
@@ -56,6 +63,10 @@ public class JFlowLayout extends ViewGroup {
             mType = TYPE_COLUMN;
         }
 
+    }
+
+    private boolean isCheck() {
+        return mCheckNum > 0;
     }
 
     @Override
@@ -128,7 +139,7 @@ public class JFlowLayout extends ViewGroup {
         }
     }
 
-    private int[] measureChildrenWithHorizontal(int widthMeasureSpec, int heightMeasureSpec, int defChildWidth) {
+    private int[] measureChildrenWithHorizontal(int widthMeasureSpec, int heightMeasureSpec, int childWidth) {
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int maxWidth = 0;
         int maxHeight = 0;
@@ -144,11 +155,8 @@ public class JFlowLayout extends ViewGroup {
                 continue;
             }
             measureChild(child, widthMeasureSpec, heightMeasureSpec);
-            int childWidth = 0;
             if (mType == TYPE_FLOW) {
                 childWidth = child.getMeasuredWidth();
-            } else {
-                childWidth = defChildWidth * Math.min(child.rowSpan, mColumnCount);
             }
             Log.e(TAG, "measureChildrenWithHorizontal childWidth: " + childWidth);
             int childHeight = child.getMeasuredHeight();
@@ -236,16 +244,16 @@ public class JFlowLayout extends ViewGroup {
 
     @Override
     public LayoutParams generateLayoutParams(AttributeSet attrs) {
-        return new JLayoutParams(getContext(), attrs);
+        return new FrameLayout.LayoutParams(getContext(), attrs);
     }
 
     @Override
     protected LayoutParams generateDefaultLayoutParams() {
-        return new JLayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        return new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
     }
 
     @Override
     protected LayoutParams generateLayoutParams(LayoutParams p) {
-        return new JLayoutParams(p);
+        return new FrameLayout.LayoutParams(p);
     }
 }

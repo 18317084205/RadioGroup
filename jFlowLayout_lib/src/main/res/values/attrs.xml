@@ -16,9 +16,8 @@
     <declare-styleable name="JFlowLayout">
         <attr name="rowCount" format="integer" />
         <attr name="columnCount" format="integer" />
-        <attr name="rowSpan" format="integer" />
-        <attr name="columnSpan" format="integer" />
 
+        <attr name="checkNum" format="integer" />
 
         <attr name="Orientation">
             <enum name="horizontal" value="0" />

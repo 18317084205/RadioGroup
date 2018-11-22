@@ -1,6 +1,7 @@
 package com.liang.jradiogroup;
 
 import android.view.View;
+import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +51,6 @@ public class RadioGroupHelper {
             }
         }
     }
-
     private void dispatchSelected(View view) {
         if (listener != null) {
             listener.onSelected(view);

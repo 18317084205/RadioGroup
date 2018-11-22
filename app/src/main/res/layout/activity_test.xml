@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".TestActivity">
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"></android.support.v7.widget.RecyclerView>
     <com.liang.jradiogroup.JFlowLayout
         android:id="@+id/JFlowLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         android:background="#838689">
 
         <TextView
@@ -18,7 +23,6 @@
             android:layout_margin="10dp"
             android:background="@color/colorPrimary"
             android:text="asd1"
-            app:rowSpan = "2"
             android:textColor="@drawable/text_color_tab" />
 
         <TextView
@@ -104,5 +108,18 @@
             android:text="JRadioGroup00000"
             android:textColor="@drawable/text_color_tab" />
     </com.liang.jradiogroup.JFlowLayout>
+
+    <com.liang.jradiogroup.CCLayout
+        android:id="@+id/cc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:background="@android:color/holo_green_dark"/>
+
+    <ListView
+        android:id="@+id/lv"
+        android:layout_width="match_parent"
+        android:visibility="gone"
+        android:layout_height="wrap_content"/>
 
 </android.support.constraint.ConstraintLayout>

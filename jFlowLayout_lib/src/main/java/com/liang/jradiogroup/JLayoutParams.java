@@ -15,8 +15,6 @@ public class JLayoutParams extends FrameLayout.LayoutParams {
     public JLayoutParams(Context c, AttributeSet attrs) {
         super(c, attrs);
         TypedArray type = c.obtainStyledAttributes(attrs, R.styleable.JFlowLayout);
-        rowSpan = type.getInt(R.styleable.JFlowLayout_rowSpan, 1);
-        columnSpan = type.getInt(R.styleable.JFlowLayout_columnSpan, 1);
         type.recycle();
     }
 

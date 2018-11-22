@@ -2,11 +2,7 @@ package com.liang.jradiogroup;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.util.AttributeSet;
-import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 public class ChildLayout extends FrameLayout {
@@ -15,29 +11,12 @@ public class ChildLayout extends FrameLayout {
     public int right;
     public int bottom;
 
-    public int leftMargin;
-    public int topMargin;
-    public int rightMargin;
-    public int bottomMargin;
-
     public int position;
     public int row;
     public int column;
 
-    public int rowSpan;
-    public int columnSpan;
-
     public ChildLayout(@NonNull Context context) {
         super(context);
-    }
-
-
-    @Override
-    public void addView(View child, int index, ViewGroup.LayoutParams params) {
-        super.addView(child, index, params);
-        JLayoutParams lp = (JLayoutParams) params;
-        rowSpan = lp.rowSpan;
-        columnSpan = lp.columnSpan;
     }
 
     @Override
@@ -76,17 +55,6 @@ public class ChildLayout extends FrameLayout {
                 child.layout(childLeft, childTop, childRight, childBottom);
             }
         }
-
-    }
-
-    @Override
-    public LayoutParams generateLayoutParams(AttributeSet attrs) {
-        return new JLayoutParams(getContext(), attrs);
-    }
-
-    @Override
-    protected LayoutParams generateDefaultLayoutParams() {
-        return new JLayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
     }
 
 }
